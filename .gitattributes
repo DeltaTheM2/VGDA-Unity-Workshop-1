@@ -1,0 +1,27 @@
+# Normalize text files to LF in the repo and on checkout (Unity writes LF anyway).
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.fbx binary
+*.glb binary
+*.ttf binary
+*.otf binary
+*.asset -text merge=unityyamlmerge diff
+*.unity -text merge=unityyamlmerge diff
+*.prefab -text merge=unityyamlmerge diff
+*.mat -text merge=unityyamlmerge diff
+*.physicMaterial -text merge=unityyamlmerge diff
+*.physicsMaterial -text merge=unityyamlmerge diff
+*.meta -text merge=unityyamlmerge diff
+*.controller -text merge=unityyamlmerge diff
+*.anim -text merge=unityyamlmerge diff
+
+# Instructor-only material is left out of attendee zips (git archive honours export-ignore).
+UnityProject/Assets/_Instructor export-ignore
+UnityProject/Assets/_Instructor.meta export-ignore
+Tools export-ignore
+Docs/INSTRUCTOR_GUIDE.md export-ignore
+Docs/MANUAL_SETUP.md export-ignore
+.gitattributes export-ignore

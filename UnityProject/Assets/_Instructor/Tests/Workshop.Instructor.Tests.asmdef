@@ -1,0 +1,23 @@
+{
+    "name": "Workshop.Instructor.Tests",
+    "rootNamespace": "Workshop.Instructor.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

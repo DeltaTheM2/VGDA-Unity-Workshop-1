@@ -1,0 +1,17 @@
+# The Unity project has its own .gitignore in UnityProject/.
+
+# Checkpoint zips are build outputs (upload them to a GitHub Release instead).
+/dist/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# A Unity project opened at the repo root by mistake (the real one is UnityProject/).
+/Library/
+/Logs/
+/Packages/
+/ProjectSettings/
+/UserSettings/
+/Temp/
