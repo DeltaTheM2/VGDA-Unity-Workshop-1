@@ -29,6 +29,9 @@ namespace Workshop.Instructor
         public const string PrefabsDir = Root + "/Prefabs";
         public const string BackupDir = Root + "/_Backup";
         public const string PrebuiltDir = Root + "/Prebuilt";
+        public const string CheckpointsDir = Root + "/Checkpoints";
+        public const string CheckpointScriptsDir = CheckpointsDir + "/_Scripts";
+        public const string CheckpointPartsDir = CheckpointsDir + "/_Parts";
         public const string TmpFontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
         public const string TmpOutlineMaterialPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat";
 
@@ -44,11 +47,41 @@ namespace Workshop.Instructor
         public static readonly Vector3 GoalPlatformPosition = new Vector3(0f, 0f, 50f); // 6x6x2 -> top at y = 2, z 47..53
         public static readonly Vector3 PlayerSpawnPosition = new Vector3(0f, 1f, 0f);   // capsule center, feet on y = 0
 
+        // ---------- Build target ----------
+        // Every step writes into a target: the live Arena (built from the scripts attendees type)
+        // or a self-contained checkpoint scene (its own prefabs, plus the namespaced script copies
+        // in Checkpoints/_Scripts that never clash with the attendees' own scripts).
+        public class BuildTarget
+        {
+            public string ScenePath;
+            public string PrefabsDir;
+            public string PhysicsMaterialsDir;
+            public string[] ScriptDirs;
+        }
+
+        static readonly BuildTarget LiveArena = new BuildTarget
+        {
+            ScenePath = ArenaScenePath,
+            PrefabsDir = PrefabsDir,
+            PhysicsMaterialsDir = PhysicsMaterialsDir,
+            ScriptDirs = new[] { ScriptsDir, PrebuiltDir },
+        };
+
+        static BuildTarget target = LiveArena;
+
+        static void WithTarget(BuildTarget buildTarget, Action build)
+        {
+            var previous = target;
+            target = buildTarget;
+            try { build(); }
+            finally { target = previous; }
+        }
+
         // ---------- Asset helpers ----------
         static GameObject KayKit(string modelName) => LoadRequired<GameObject>($"{KayKitDir}/{modelName}.fbx");
         static GameObject Kenney(string modelName) => LoadRequired<GameObject>($"{KenneyDir}/{modelName}.fbx");
         static Material WorkshopMaterial(string name) => LoadRequired<Material>($"{MaterialsDir}/{name}.mat");
-        static GameObject Prefab(string name) => LoadRequired<GameObject>($"{PrefabsDir}/{name}.prefab");
+        static GameObject Prefab(string name) => LoadRequired<GameObject>($"{target.PrefabsDir}/{name}.prefab");
         static GameObject BackupPrefab(string name) => LoadRequired<GameObject>($"{BackupDir}/{name}.prefab");
 
         static T LoadRequired<T>(string path) where T : Object
@@ -177,7 +210,7 @@ namespace Workshop.Instructor
         // ---------- Lesson scripts (looked up by file name so this code compiles at every step) ----------
         static Type LessonScriptType(string className)
         {
-            string guid = AssetDatabase.FindAssets($"{className} t:Script", new[] { ScriptsDir, PrebuiltDir })
+            string guid = AssetDatabase.FindAssets($"{className} t:Script", target.ScriptDirs)
                 .FirstOrDefault(g => Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(g)) == className);
             var script = guid == null ? null : AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabase.GUIDToAssetPath(guid));
             var type = script != null ? script.GetClass() : null;

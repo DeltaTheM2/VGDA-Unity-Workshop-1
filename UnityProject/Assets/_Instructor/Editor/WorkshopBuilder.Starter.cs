@@ -47,7 +47,7 @@ namespace Workshop.Instructor
         enum ColliderKind { None, Box, Mesh }
 
         // One entry per ready-made part in _Backup/. The first three match the parts
-        // built live in Step 3 exactly (Trap is still the Step 3 placeholder).
+        // built live in Step 2 exactly (Trap is still the Step 2 placeholder).
         static readonly (string name, string model, ColliderKind collider, bool ground, string material)[] BackupParts =
         {
             ("Block", "platform_2x2x1_blue", ColliderKind.Box, true, null),
@@ -76,11 +76,11 @@ namespace Workshop.Instructor
                 CreatePartPrefab($"{BackupDir}/{part.name}.prefab", part.model, part.collider, part.ground, part.material);
             BuildWinScene();
             BuildArenaScene();
-            EditorBuildSettings.scenes = new[]
-            {
-                new EditorBuildSettingsScene(ArenaScenePath, true),
-                new EditorBuildSettingsScene(WinScenePath, true),
-            };
+            BuildCheckpointScenes();
+            // Checkpoint scenes must be listed too: KillOnTouch reloads the active scene by name.
+            EditorBuildSettings.scenes = new[] { ArenaScenePath, WinScenePath }.Concat(CheckpointScenePaths)
+                .Select(path => new EditorBuildSettingsScene(path, true)).ToArray();
+            OpenScene(ArenaScenePath);
             SaveAssetsAndLog("step-0-starter");
         }
 
@@ -277,14 +277,14 @@ namespace Workshop.Instructor
             followObject.transform.LookAt(PlayerSpawnPosition);
             cameraObject.transform.SetPositionAndRotation(followObject.transform.position, followObject.transform.rotation);
 
-            // --- Invisible trigger far below the level. It gets KillOnTouch in Step 5.
+            // --- Invisible trigger far below the level. It gets KillOnTouch in Step 6.
             var fallZone = new GameObject("FallZone");
             fallZone.transform.position = new Vector3(0f, -30f, 25f);
             var fallBox = fallZone.AddComponent<BoxCollider>();
             fallBox.isTrigger = true;
             fallBox.size = new Vector3(400f, 10f, 400f);
 
-            // --- UI: an empty, disabled score label in the top-left corner (used in Step 6)
+            // --- UI: an empty, disabled score label in the top-left corner (used in Step 7)
             var canvas = CreateCanvas();
             var scoreText = CreateText("ScoreText", canvas.transform, "", 60, TextAlignmentOptions.TopLeft, Color.white);
             var scoreRect = (RectTransform)scoreText.transform;

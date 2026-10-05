@@ -112,7 +112,7 @@ Install it with the **Game development with Unity** workload (the Unity Hub modu
 
 ## Checkpoints
 
-Fell behind? Every step of the workshop has a finished copy you can jump to. See **[CHECKPOINTS.md](CHECKPOINTS.md)**.
+Fell behind during the workshop? In the Project window, open **`_Workshop > Checkpoints`** and double-click the scene for the step we just finished. It's a complete, working copy, already inside your project. More options (including full-project zips for after the workshop) are in **[CHECKPOINTS.md](CHECKPOINTS.md)**.
 
 ## Credits
 

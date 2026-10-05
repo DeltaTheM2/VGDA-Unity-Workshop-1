@@ -53,7 +53,7 @@ Then, by hand:
 
 ### B3. Everything else
 
-Everything else (materials, `_Backup` prefabs, both scenes, lighting, tags and layers, gravity, build scenes, TMP Essentials, every checkpoint) comes from:
+Everything else (materials, `_Backup` prefabs, the Arena and Win scenes, the seven catch-up scenes in `Checkpoints/`, lighting, tags and layers, gravity, build scenes, TMP Essentials, every checkpoint tag) comes from:
 
 ```bash
 Tools/build-checkpoints.sh
@@ -95,7 +95,7 @@ Tools/build-checkpoints.sh
 1. **Playmode tint:** Edit > Preferences > **Colors > Playmode tint** → a loud color. It makes the "changes in Play mode get lost" moment land.
 2. **Readable projector:** Edit > Preferences > **General > Editor Theme** (Light often projects better), and **UI Scaling** 125–150%. Zoom the code editor way in.
 3. **Layout:** Scene and Game side by side, Console visible, Inspector wide enough for tooltips.
-4. **Two projects open:** `final` (for the opening demo) and a **fresh** unzip of `step-0-starter` (for building live).
+4. **One project:** a **fresh** unzip of `step-0-starter`. The opening demo is the `Checkpoints > Final - Demo Course` scene inside it, and you build live in `Scenes > Arena`.
 5. **Grid snapping:** attendee projects set it on first open (`Prebuilt/Editor/WorkshopProjectSetup.cs`: 1 m moves, 90° rotation steps, Global handles). Your rehearsal copy has it too. If snapping seems off, check the grid-snap toggle in the Scene view toolbar and that the handle is set to **Global**.
 
 ---

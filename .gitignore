@@ -15,3 +15,6 @@ desktop.ini
 /ProjectSettings/
 /UserSettings/
 /Temp/
+
+# The workshop slide deck is kept locally (it has personal details); not part of the repo.
+/Slides/

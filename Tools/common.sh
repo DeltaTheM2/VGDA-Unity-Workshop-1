@@ -6,8 +6,8 @@ PROJECT_DIR="$REPO_ROOT/UnityProject"
 GUIDE="$REPO_ROOT/Docs/INSTRUCTOR_GUIDE.md"
 LOG_DIR="$PROJECT_DIR/Logs/workshop-tools"
 
-# Every checkpoint, in order. Step 4 (Remix #1) has no checkpoint.
-CHECKPOINTS=(step-0-starter step-1-lifecycle step-2-player step-3-prefabs step-5-hazards step-6-goal final)
+# Every checkpoint, in order. Step 5 (Remix #1) has no checkpoint.
+CHECKPOINTS=(step-0-starter step-1-basics step-2-parts step-3-scripting step-4-player step-6-hazards step-7-goal final)
 
 UNITY_VERSION="$(sed -n 's/^m_EditorVersion: //p' "$PROJECT_DIR/ProjectSettings/ProjectVersion.txt" | tr -d '\r')"
 

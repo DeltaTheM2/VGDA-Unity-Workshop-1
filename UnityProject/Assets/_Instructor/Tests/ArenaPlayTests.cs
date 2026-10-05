@@ -12,9 +12,11 @@ using UnityEngine.UI;
 
 namespace Workshop.Instructor.Tests
 {
-    // PlayMode tests that play the Arena the way a person would, through a virtual gamepad.
+    // PlayMode tests that play a level the way a person would, through a virtual gamepad.
     // The same suite runs at every checkpoint: tests whose objects don't exist yet are Ignored.
     // Any error or exception logged during a test fails it (Unity Test Framework default).
+    // By default it plays the Arena; pass "-testScenes all" to also play every checkpoint scene.
+    [TestFixtureSource(nameof(Scenes))]
     public class ArenaPlayTests
     {
         const float RunSpeed = 6f;
@@ -22,14 +24,32 @@ namespace Workshop.Instructor.Tests
         const float Gravity = 25f;
         static readonly float ExpectedJumpHeight = JumpVelocity * JumpVelocity / (2f * Gravity); // ~1.62 m
 
+        readonly string level;
         Gamepad pad;
         InputSettings originalSettings;
         Vector2 stick;
-        int arenaReloads;
+        int levelReloads;
         string lastLoadedScene;
 
         static GameObject Player => GameObject.FindWithTag("Player");
         static Vector3 PlayerPosition => Player.transform.position;
+
+        public ArenaPlayTests(string level)
+        {
+            this.level = level;
+        }
+
+        public static IEnumerable<string> Scenes()
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            int index = System.Array.IndexOf(args, "-testScenes");
+            string wanted = index >= 0 && index + 1 < args.Length ? args[index + 1] : "Arena";
+            if (wanted != "all")
+                return wanted.Split(';');
+            return Enumerable.Range(0, SceneManager.sceneCountInBuildSettings)
+                .Select(i => System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i)))
+                .Where(name => name != "Win" && !name.StartsWith("InitTestScene")).ToArray(); // the runner adds a temporary InitTestScene
+        }
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -44,10 +64,10 @@ namespace Workshop.Instructor.Tests
             Time.captureFramerate = 60;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
-            SceneManager.LoadScene("Arena");
+            SceneManager.LoadScene(level);
             yield return null;
             yield return null;
-            arenaReloads = 0; // only count reloads caused by the test itself
+            levelReloads = 0; // only count reloads caused by the test itself
         }
 
         [UnityTearDown]
@@ -63,8 +83,8 @@ namespace Workshop.Instructor.Tests
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             lastLoadedScene = scene.name;
-            if (scene.name == "Arena")
-                arenaReloads++;
+            if (scene.name == level)
+                levelReloads++;
         }
 
         // ---------- Input and helpers ----------
@@ -87,6 +107,14 @@ namespace Workshop.Instructor.Tests
         {
             if (Player == null)
                 Assert.Ignore("No Player in this checkpoint yet.");
+        }
+
+        // Steps 1-3 have a Player made only of components; it can't be steered until Step 4.
+        static void RequireController()
+        {
+            RequirePlayer();
+            if (!HasScript(Player, "PlayerController"))
+                Assert.Ignore("The Player has no PlayerController yet.");
         }
 
         static bool HasScript(GameObject go, string className) =>
@@ -118,7 +146,7 @@ namespace Workshop.Instructor.Tests
             float elapsed = 0f;
             while (true)
             {
-                Assert.AreEqual(0, arenaReloads, "The player died (the level restarted) on the way.");
+                Assert.AreEqual(0, levelReloads, "The player died (the level restarted) on the way.");
                 var p = PlayerPosition;
                 var toTarget = new Vector2(x - p.x, z - p.z);
                 if (toTarget.magnitude <= tolerance)
@@ -139,14 +167,14 @@ namespace Workshop.Instructor.Tests
 
         // ---------- Every checkpoint ----------
         [UnityTest]
-        public IEnumerator Arena_RunsWithoutErrors()
+        public IEnumerator Level_RunsWithoutErrors()
         {
             yield return new WaitForSeconds(2f);
-            Assert.AreEqual("Arena", SceneManager.GetActiveScene().name);
+            Assert.AreEqual(level, SceneManager.GetActiveScene().name);
         }
 
         [UnityTest]
-        public IEnumerator WinScreen_PlayAgainWithGamepadReturnsToArena()
+        public IEnumerator WinScreen_PlayAgainWithGamepadReturnsToTheLevel()
         {
             SceneManager.LoadScene("Win");
             yield return null;
@@ -154,22 +182,45 @@ namespace Workshop.Instructor.Tests
             Assert.IsNotNull(GameObject.Find("PlayAgainButton").GetComponent<Button>());
             yield return PressSouthButton(); // the button is pre-selected, so "A" clicks it
             yield return null;
-            Assert.AreEqual("Arena", SceneManager.GetActiveScene().name);
+            Assert.AreEqual(level, SceneManager.GetActiveScene().name);
         }
 
         // ---------- Step 1 ----------
         [UnityTest]
+        public IEnumerator Player_FallsWithPhysicsAndLands()
+        {
+            RequirePlayer();
+            Teleport(new Vector3(0f, 6f, 0f)); // like setting Position Y to 6 in the Inspector
+            yield return new WaitForSeconds(0.2f);
+            Assert.Less(PlayerPosition.y, 6f, "With a Rigidbody, gravity should pull the player down.");
+            yield return new WaitForSeconds(1.5f);
+            Assert.AreEqual(1f, PlayerPosition.y, 0.1f, "The capsule collider should land on the start platform.");
+        }
+
+        // ---------- Step 3 ----------
+        [UnityTest]
+        public IEnumerator Spinner_TurnsItsObject()
+        {
+            var spinner = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).FirstOrDefault(m => m.GetType().Name == "Spinner");
+            if (spinner == null)
+                Assert.Ignore("No Spinner in this checkpoint.");
+            var start = spinner.transform.rotation;
+            yield return new WaitForSeconds(0.25f);
+            Assert.Greater(Quaternion.Angle(start, spinner.transform.rotation), 20f, "Spinner should rotate its object every frame.");
+        }
+
+        [UnityTest]
         public IEnumerator Lifecycle_LogsEventsInOrder()
         {
-            if (GameObject.Find("LifecycleDemo") == null)
-                Assert.Ignore("No LifecycleDemo in this checkpoint.");
+            if (GameObject.Find("ScriptDemo") == null)
+                Assert.Ignore("No ScriptDemo in this checkpoint.");
             var logs = new List<string>();
             Application.LogCallback capture = (message, stack, type) =>
             {
-                if (message.Contains("LifecycleDemo: ")) logs.Add(message);
+                if (message.Contains("ScriptDemo: ")) logs.Add(message);
             };
             Application.logMessageReceived += capture;
-            SceneManager.LoadScene("Arena");
+            SceneManager.LoadScene(level);
             yield return new WaitForSeconds(0.5f);
             Application.logMessageReceived -= capture;
 
@@ -183,7 +234,7 @@ namespace Workshop.Instructor.Tests
             Assert.AreEqual(1, logs.Skip(reloadStart).Count(l => l.EndsWith(": FixedUpdate")), "FixedUpdate should log only once.");
         }
 
-        // ---------- Step 2 ----------
+        // ---------- Step 4 ----------
         [UnityTest]
         public IEnumerator Player_StandsStillOnTheStartPlatform()
         {
@@ -196,7 +247,7 @@ namespace Workshop.Instructor.Tests
         [UnityTest]
         public IEnumerator Player_RunsAtMoveSpeed([Values(30, 60, 144)] int framesPerSecond)
         {
-            RequirePlayer();
+            RequireController();
             Time.captureFramerate = framesPerSecond;
             yield return new WaitForSeconds(0.5f);
             SetStick(Vector2.left); // left is clear at every checkpoint
@@ -211,7 +262,7 @@ namespace Workshop.Instructor.Tests
         [UnityTest]
         public IEnumerator Player_JumpReachesExpectedHeight([Values(30, 60, 144)] int framesPerSecond)
         {
-            RequirePlayer();
+            RequireController();
             Time.captureFramerate = framesPerSecond;
             yield return new WaitForSeconds(1f);
             float startY = PlayerPosition.y;
@@ -225,7 +276,7 @@ namespace Workshop.Instructor.Tests
         [UnityTest]
         public IEnumerator Player_CannotJumpAgainInMidAir()
         {
-            RequirePlayer();
+            RequireController();
             yield return new WaitForSeconds(1f);
             float startY = PlayerPosition.y;
             yield return PressSouthButton();
@@ -236,13 +287,13 @@ namespace Workshop.Instructor.Tests
             Assert.Less(maxY[0] - startY, ExpectedJumpHeight + 0.15f);
         }
 
-        // Step 2's planned failures must really happen on stage, so test them too.
+        // Step 4's planned failures must really happen on stage, so test them too.
         [UnityTest]
         public IEnumerator PlannedFailure_CapsuleTipsOverWithoutFrozenRotation()
         {
-            RequirePlayer();
+            RequireController();
             yield return new WaitForSeconds(0.5f);
-            // The state before the fixes in Step 2: default friction, no rotation constraints.
+            // The state before the fixes in Step 4: default friction, no rotation constraints.
             Player.GetComponent<CapsuleCollider>().sharedMaterial = null;
             Player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
             SetStick(Vector2.left);
@@ -261,7 +312,7 @@ namespace Workshop.Instructor.Tests
         [UnityTest]
         public IEnumerator PlannedFailure_StickyWallsWithoutNoFriction()
         {
-            RequirePlayer();
+            RequireController();
             yield return new WaitForSeconds(0.5f);
             var capsule = Player.GetComponent<CapsuleCollider>();
             var noFriction = capsule.sharedMaterial;
@@ -288,11 +339,11 @@ namespace Workshop.Instructor.Tests
             Assert.Greater(fallWithoutFriction, 2f, "With NoFriction the player should slide down the wall.");
         }
 
-        // ---------- Step 3 ----------
+        // ---------- Step 4 (on the Step 2 ramp) ----------
         [UnityTest]
         public IEnumerator Player_CanClimbTheRamp()
         {
-            RequirePlayer();
+            RequireController();
             var ramp = GameObject.Find("Ramp");
             if (ramp == null || ramp.GetComponent<Collider>() == null)
                 Assert.Ignore("No Ramp with a collider in this checkpoint.");
@@ -309,7 +360,7 @@ namespace Workshop.Instructor.Tests
             Assert.Greater(maxY[0], ramp.transform.position.y + 4f + 1f - 0.3f, "The player should reach the top of the ramp.");
         }
 
-        // ---------- Step 5 ----------
+        // ---------- Step 6 ----------
         [UnityTest]
         public IEnumerator Trap_RestartsTheLevel()
         {
@@ -319,7 +370,7 @@ namespace Workshop.Instructor.Tests
                 Assert.Ignore("The Trap is still a placeholder in this checkpoint.");
             Teleport(trap.transform.position + Vector3.up);
             yield return new WaitForSeconds(0.3f);
-            Assert.AreEqual(1, arenaReloads, "Touching the trap should reload the Arena.");
+            Assert.AreEqual(1, levelReloads, "Touching the trap should reload the level.");
         }
 
         [UnityTest]
@@ -330,7 +381,7 @@ namespace Workshop.Instructor.Tests
                 Assert.Ignore("The FallZone has no KillOnTouch yet.");
             Teleport(new Vector3(-12f, -5f, 20f)); // over empty space
             yield return new WaitForSeconds(3f);
-            Assert.AreEqual(1, arenaReloads, "Falling into the FallZone should reload the Arena.");
+            Assert.AreEqual(1, levelReloads, "Falling into the FallZone should reload the level.");
         }
 
         [UnityTest]
@@ -357,7 +408,7 @@ namespace Workshop.Instructor.Tests
             Assert.AreEqual(2f, PlayerPosition.y - platform.transform.position.y, 0.15f, "The player should be standing on the platform.");
         }
 
-        // ---------- Step 6 ----------
+        // ---------- Step 7 ----------
         [UnityTest]
         public IEnumerator Coins_CountUpAndCollectingAllLoadsWin()
         {
@@ -412,7 +463,7 @@ namespace Workshop.Instructor.Tests
         [UnityTest]
         public IEnumerator DemoCourse_BotRunsStartToFinish()
         {
-            RequirePlayer();
+            RequireController();
             if (GameObject.Find("DemoCourse") == null)
                 Assert.Ignore("No demo course in this checkpoint.");
             var platform = GameObject.Find("Platform").transform;

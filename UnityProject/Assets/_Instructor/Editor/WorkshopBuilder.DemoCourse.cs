@@ -17,8 +17,8 @@ namespace Workshop.Instructor
             var bouncePad = CreateBouncePadPrefab();
             var spinningSaw = CreateSpinningSawPrefab();
 
-            var scene = OpenScene(ArenaScenePath);
-            // Clear out the sample pieces from Steps 3-6 and any earlier demo course.
+            var scene = OpenScene(target.ScenePath);
+            // Clear out the sample pieces from Steps 2-7 and any earlier demo course.
             DestroyAllNamed(scene, "Block", "Ramp", "Trap", "MovingPlatform", "Coin", "DemoCourse");
             var course = new GameObject("DemoCourse").transform;
 
@@ -86,7 +86,7 @@ namespace Workshop.Instructor
             var pad = InstantiateUnpacked(KayKit("spring_pad_blue"), "BouncePad");
             AddFittedBoxCollider(pad);
             AddLessonScript(pad, "BouncePad");
-            var prefab = PrefabUtility.SaveAsPrefabAsset(pad, $"{PrefabsDir}/BouncePad.prefab");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(pad, $"{target.PrefabsDir}/BouncePad.prefab");
             Object.DestroyImmediate(pad);
             return prefab;
         }
@@ -103,7 +103,7 @@ namespace Workshop.Instructor
             AddLessonScript(saw, "KillOnTouch");
             var spinner = AddLessonScript(saw, "Spinner");
             SetSerialized(spinner, "axis", p => p.vector3Value = Vector3.forward);
-            var prefab = PrefabUtility.SaveAsPrefabAsset(saw, $"{PrefabsDir}/SpinningSaw.prefab");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(saw, $"{target.PrefabsDir}/SpinningSaw.prefab");
             Object.DestroyImmediate(saw);
             return prefab;
         }

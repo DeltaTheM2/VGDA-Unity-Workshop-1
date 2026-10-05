@@ -7,34 +7,37 @@ using UnityEngine;
 namespace Workshop.Instructor
 {
     // Menu items for the instructor, plus the entry point used by Tools/build-checkpoints.sh:
-    //   Unity -batchmode -projectPath UnityProject -executeMethod Workshop.Instructor.WorkshopMenu.BuildFromCommandLine -checkpoint step-2-player
+    //   Unity -batchmode -projectPath UnityProject -executeMethod Workshop.Instructor.WorkshopMenu.BuildFromCommandLine -checkpoint step-4-player
     public static class WorkshopMenu
     {
-        // In order. Step 4 (Remix #1) has no checkpoint: it's free building with no new code.
+        // In order. Step 5 (Remix #1) has no checkpoint: it's free building with no new code.
         public static readonly (string tag, Action build)[] Checkpoints =
         {
             ("step-0-starter", WorkshopBuilder.BuildStarter),
-            ("step-1-lifecycle", WorkshopBuilder.BuildStep1Lifecycle),
-            ("step-2-player", WorkshopBuilder.BuildStep2Player),
-            ("step-3-prefabs", WorkshopBuilder.BuildStep3Prefabs),
-            ("step-5-hazards", WorkshopBuilder.BuildStep5Hazards),
-            ("step-6-goal", WorkshopBuilder.BuildStep6Goal),
+            ("step-1-basics", WorkshopBuilder.BuildStep1Basics),
+            ("step-2-parts", WorkshopBuilder.BuildStep2Parts),
+            ("step-3-scripting", WorkshopBuilder.BuildStep3Scripting),
+            ("step-4-player", WorkshopBuilder.BuildStep4Player),
+            ("step-6-hazards", WorkshopBuilder.BuildStep6Hazards),
+            ("step-7-goal", WorkshopBuilder.BuildStep7Goal),
             ("final", WorkshopBuilder.BuildFinalDemoCourse),
         };
 
         [MenuItem("Workshop/Build Checkpoint/Step 0 - Starter", priority = 0)]
         static void MenuStarter() => BuildInteractive("step-0-starter");
-        [MenuItem("Workshop/Build Checkpoint/Step 1 - Lifecycle", priority = 1)]
-        static void MenuStep1() => BuildInteractive("step-1-lifecycle");
-        [MenuItem("Workshop/Build Checkpoint/Step 2 - Player", priority = 2)]
-        static void MenuStep2() => BuildInteractive("step-2-player");
-        [MenuItem("Workshop/Build Checkpoint/Step 3 - Prefabs", priority = 3)]
-        static void MenuStep3() => BuildInteractive("step-3-prefabs");
-        [MenuItem("Workshop/Build Checkpoint/Step 5 - Hazards", priority = 5)]
-        static void MenuStep5() => BuildInteractive("step-5-hazards");
-        [MenuItem("Workshop/Build Checkpoint/Step 6 - Goal", priority = 6)]
-        static void MenuStep6() => BuildInteractive("step-6-goal");
-        [MenuItem("Workshop/Build Checkpoint/Final - Demo Course", priority = 7)]
+        [MenuItem("Workshop/Build Checkpoint/Step 1 - Unity Basics", priority = 1)]
+        static void MenuStep1() => BuildInteractive("step-1-basics");
+        [MenuItem("Workshop/Build Checkpoint/Step 2 - Parts", priority = 2)]
+        static void MenuStep2() => BuildInteractive("step-2-parts");
+        [MenuItem("Workshop/Build Checkpoint/Step 3 - Scripting", priority = 3)]
+        static void MenuStep3() => BuildInteractive("step-3-scripting");
+        [MenuItem("Workshop/Build Checkpoint/Step 4 - Player", priority = 4)]
+        static void MenuStep4() => BuildInteractive("step-4-player");
+        [MenuItem("Workshop/Build Checkpoint/Step 6 - Hazards", priority = 6)]
+        static void MenuStep6() => BuildInteractive("step-6-hazards");
+        [MenuItem("Workshop/Build Checkpoint/Step 7 - Coins and Win", priority = 7)]
+        static void MenuStep7() => BuildInteractive("step-7-goal");
+        [MenuItem("Workshop/Build Checkpoint/Final - Demo Course", priority = 8)]
         static void MenuFinal() => BuildInteractive("final");
 
         [MenuItem("Workshop/Validate Project", priority = 20)]

@@ -1,4 +1,3 @@
-using System.Linq;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEditor;
@@ -8,10 +7,11 @@ namespace Workshop.Instructor
 {
     public static partial class WorkshopBuilder
     {
-        // Sample pieces the instructor drags in during Steps 3, 5 and 6.
+        // Sample pieces the instructor drags in during Steps 2, 6 and 7.
         static readonly Vector3 SampleBlockPosition = new Vector3(0f, -1f, 4f);   // top at y = 0, touching the start platform
         static readonly Vector3 SampleRampPosition = new Vector3(0f, -1f, 8f);    // rotated 180: slope climbs from y = 0 to y = 3 going +Z
         static readonly Vector3 SampleTrapPosition = new Vector3(2f, 0f, -1.5f);  // on the start platform, beside the spawn
+        static readonly Vector3 ScriptDemoPosition = new Vector3(2f, 0.5f, 2f);   // a cube on the start platform
         static readonly Vector3 SampleMovingPlatformPosition = new Vector3(5f, -1f, 0f); // rides +X off the start platform's right side
         static readonly Vector3[] SampleCoinPositions =
         {
@@ -22,49 +22,80 @@ namespace Workshop.Instructor
             new Vector3(2f, 0.3f, 1.2f), // right next to the trap
         };
 
-        // ================= Step 1: script lifecycle demo =================
-        public static void BuildStep1Lifecycle()
+        // ================= Step 1: Unity basics (no code) =================
+        // The player is built from components: a capsule (mesh + collider) and a Rigidbody, so physics drops it.
+        public static void BuildStep1Basics()
         {
-            var scene = OpenScene(ArenaScenePath);
-            DestroyAllNamed(scene, "LifecycleDemo");
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.name = "LifecycleDemo";
-            cube.transform.position = new Vector3(2f, 0.5f, 2f);
-            AddLessonScript(cube, "LifecycleLogger");
-            SaveScene(scene);
-            SaveAssetsAndLog("step-1-lifecycle");
-        }
-
-        // ================= Step 2: the player =================
-        public static void BuildStep2Player()
-        {
-            var noFriction = CreateNoFrictionMaterial();
-
-            var scene = OpenScene(ArenaScenePath);
-            DestroyAllNamed(scene, "LifecycleDemo", "Player");
+            var scene = OpenScene(target.ScenePath);
+            DestroyAllNamed(scene, "Player");
 
             var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player";
             player.tag = PlayerTag;
             player.transform.position = FindRequired(scene, "PlayerSpawn").transform.position;
             player.GetComponent<MeshRenderer>().sharedMaterial = WorkshopMaterial("PlayerBlue");
-            player.GetComponent<CapsuleCollider>().sharedMaterial = noFriction;
-
-            var body = player.AddComponent<Rigidbody>();
-            body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-
-            var controller = AddLessonScript(player, "PlayerController");
-            SetSerialized(controller, "groundLayer", p => p.intValue = 1 << GroundLayer);
+            player.AddComponent<Rigidbody>();
 
             FindRequired(scene, "Follow Camera").GetComponent<CinemachineCamera>().Follow = player.transform;
 
             SaveScene(scene);
-            SaveAssetsAndLog("step-2-player");
+            SaveAssetsAndLog("step-1-basics");
+        }
+
+        // ================= Step 2: prefabs built from raw models =================
+        public static void BuildStep2Parts()
+        {
+            EnsureFolder(target.PrefabsDir);
+            var block = CreatePartPrefab($"{target.PrefabsDir}/Block.prefab", "platform_2x2x1_blue", ColliderKind.Box, true, null);
+            var ramp = CreatePartPrefab($"{target.PrefabsDir}/Ramp.prefab", "platform_slope_4x6x4_blue", ColliderKind.Mesh, true, null);
+            var trap = CreatePartPrefab($"{target.PrefabsDir}/Trap.prefab", "Kenney/spike-block", ColliderKind.None, false, "HazardRed");
+
+            var scene = OpenScene(target.ScenePath);
+            DestroyAllNamed(scene, "Block", "Ramp", "Trap");
+            PlacePrefab(block, "Block", null, SampleBlockPosition);
+            PlacePrefab(ramp, "Ramp", null, SampleRampPosition, 180f);
+            PlacePrefab(trap, "Trap", null, SampleTrapPosition);
+            SaveScene(scene);
+            SaveAssetsAndLog("step-2-parts");
+        }
+
+        // ================= Step 3: scripting basics =================
+        // A cube with the first script (Spinner) and the lifecycle demo (LifecycleLogger).
+        public static void BuildStep3Scripting()
+        {
+            var scene = OpenScene(target.ScenePath);
+            DestroyAllNamed(scene, "ScriptDemo");
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "ScriptDemo";
+            cube.transform.position = ScriptDemoPosition;
+            AddLessonScript(cube, "Spinner");
+            AddLessonScript(cube, "LifecycleLogger");
+            SaveScene(scene);
+            SaveAssetsAndLog("step-3-scripting");
+        }
+
+        // ================= Step 4: the player controller =================
+        public static void BuildStep4Player()
+        {
+            var noFriction = CreateNoFrictionMaterial();
+
+            var scene = OpenScene(target.ScenePath);
+            DestroyAllNamed(scene, "ScriptDemo");
+
+            var player = FindRequired(scene, "Player");
+            player.GetComponent<CapsuleCollider>().sharedMaterial = noFriction;
+            player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            var controller = AddLessonScript(player, "PlayerController");
+            SetSerialized(controller, "groundLayer", p => p.intValue = 1 << GroundLayer);
+
+            SaveScene(scene);
+            SaveAssetsAndLog("step-4-player");
         }
 
         static PhysicsMaterial CreateNoFrictionMaterial()
         {
-            string path = $"{PhysicsMaterialsDir}/NoFriction.physicsMaterial";
+            EnsureFolder(target.PhysicsMaterialsDir);
+            string path = $"{target.PhysicsMaterialsDir}/NoFriction.physicsMaterial";
             var material = AssetDatabase.LoadAssetAtPath<PhysicsMaterial>(path);
             bool isNew = material == null;
             if (isNew)
@@ -81,27 +112,11 @@ namespace Workshop.Instructor
             return material;
         }
 
-        // ================= Step 3: prefabs built from raw models =================
-        public static void BuildStep3Prefabs()
-        {
-            var block = CreatePartPrefab($"{PrefabsDir}/Block.prefab", "platform_2x2x1_blue", ColliderKind.Box, true, null);
-            var ramp = CreatePartPrefab($"{PrefabsDir}/Ramp.prefab", "platform_slope_4x6x4_blue", ColliderKind.Mesh, true, null);
-            var trap = CreatePartPrefab($"{PrefabsDir}/Trap.prefab", "Kenney/spike-block", ColliderKind.None, false, "HazardRed");
-
-            var scene = OpenScene(ArenaScenePath);
-            DestroyAllNamed(scene, "Block", "Ramp", "Trap");
-            PlacePrefab(block, "Block", null, SampleBlockPosition);
-            PlacePrefab(ramp, "Ramp", null, SampleRampPosition, 180f);
-            PlacePrefab(trap, "Trap", null, SampleTrapPosition);
-            SaveScene(scene);
-            SaveAssetsAndLog("step-3-prefabs");
-        }
-
-        // ================= Step 5: moving platforms, traps, respawn =================
-        public static void BuildStep5Hazards()
+        // ================= Step 6: moving platforms, traps, respawn =================
+        public static void BuildStep6Hazards()
         {
             // The Trap prefab gets a trigger and KillOnTouch; every Trap in the scene updates with it.
-            string trapPath = $"{PrefabsDir}/Trap.prefab";
+            string trapPath = $"{target.PrefabsDir}/Trap.prefab";
             var trapRoot = PrefabUtility.LoadPrefabContents(trapPath);
             AddFittedBoxCollider(trapRoot, isTrigger: true);
             AddLessonScript(trapRoot, "KillOnTouch");
@@ -110,12 +125,12 @@ namespace Workshop.Instructor
 
             var movingPlatform = CreateMovingPlatformPrefab();
 
-            var scene = OpenScene(ArenaScenePath);
+            var scene = OpenScene(target.ScenePath);
             AddLessonScript(FindRequired(scene, "FallZone"), "KillOnTouch");
             DestroyAllNamed(scene, "MovingPlatform");
             PlacePrefab(movingPlatform, "MovingPlatform", null, SampleMovingPlatformPosition);
             SaveScene(scene);
-            SaveAssetsAndLog("step-5-hazards");
+            SaveAssetsAndLog("step-6-hazards");
         }
 
         // MovingPlatform (empty root)
@@ -144,17 +159,17 @@ namespace Workshop.Instructor
             var patrol = AddLessonScript(platform, "Patrol");
             SetObjectArray(patrol, "waypoints", waypointA.transform, waypointB.transform);
 
-            var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{PrefabsDir}/MovingPlatform.prefab");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{target.PrefabsDir}/MovingPlatform.prefab");
             Object.DestroyImmediate(root);
             return prefab;
         }
 
-        // ================= Step 6: coins, score and winning =================
-        public static void BuildStep6Goal()
+        // ================= Step 7: coins, score and winning =================
+        public static void BuildStep7Goal()
         {
             var coinPrefab = CreateCoinPrefab();
 
-            var scene = OpenScene(ArenaScenePath);
+            var scene = OpenScene(target.ScenePath);
             DestroyAllNamed(scene, "GameManager", "Coin", "GoalZone");
 
             var scoreText = FindRequired(scene, "ScoreText");
@@ -169,7 +184,7 @@ namespace Workshop.Instructor
             AddGoalZone(FindRequired(scene, "GoalPlatform"));
 
             SaveScene(scene);
-            SaveAssetsAndLog("step-6-goal");
+            SaveAssetsAndLog("step-7-goal");
         }
 
         static GameObject CreateCoinPrefab()
@@ -182,7 +197,7 @@ namespace Workshop.Instructor
             trigger.center = new Vector3(0f, 0.5f, 0f);
             trigger.radius = 0.6f;
             AddLessonScript(coin, "Coin");
-            var prefab = PrefabUtility.SaveAsPrefabAsset(coin, $"{PrefabsDir}/Coin.prefab");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(coin, $"{target.PrefabsDir}/Coin.prefab");
             Object.DestroyImmediate(coin);
             return prefab;
         }

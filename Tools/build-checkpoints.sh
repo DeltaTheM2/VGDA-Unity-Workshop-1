@@ -32,6 +32,9 @@ reset_to_starter() {
   local w="$PROJECT_DIR/Assets/_Workshop"
   find "$w/Scripts" -mindepth 1 ! -name 'HelloWorld.cs' ! -name 'HelloWorld.cs.meta' -exec rm -rf {} +
   find "$w/Prefabs" "$w/PhysicsMaterials" -mindepth 1 ! -name '.gitkeep' -exec rm -rf {} +
+  # The checkpoint scenes are regenerated from scratch by the starter build.
+  rm -rf "$w/Checkpoints" "$w/Checkpoints.meta"
+  "$REPO_ROOT/Tools/extract-lesson-scripts.sh" --checkpoint-copies
 }
 
 for i in "${!CHECKPOINTS[@]}"; do
@@ -55,7 +58,10 @@ for i in "${!CHECKPOINTS[@]}"; do
   fi
 
   if (( TESTS )); then
-    "$REPO_ROOT/Tools/run-tests.sh" "tests-$tag"
+    # The checkpoint scenes only change with the starter, so play all of them once there.
+    scenes="Arena"
+    [[ "$tag" == "step-0-starter" ]] && scenes="all"
+    "$REPO_ROOT/Tools/run-tests.sh" "tests-$tag" "$scenes"
   fi
 
   if (( COMMIT )); then

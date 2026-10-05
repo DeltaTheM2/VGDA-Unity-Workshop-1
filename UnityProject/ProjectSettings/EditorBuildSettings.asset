@@ -11,6 +11,27 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Workshop/Scenes/Win.unity
     guid: ba2299d186a595b42aa92bab5d6bc97c
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/1 - Unity Basics.unity
+    guid: 3b10413c9da428641b0ad9e202463b4d
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/2 - Parts.unity
+    guid: 94f27bcca19df2748b0a908a56b8d120
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/3 - Scripting.unity
+    guid: 6ca7ad5a365810c44aa6439ab2d4de31
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/4 - Player.unity
+    guid: 6250086a6c2ef5047a5e2af4835ea6ad
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/6 - Hazards.unity
+    guid: e40276b3a93399743a2c5c612b93566a
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/7 - Coins and Win.unity
+    guid: 235c50ae4ed1e6a4cb425d5be815a206
+  - enabled: 1
+    path: Assets/_Workshop/Checkpoints/Final - Demo Course.unity
+    guid: e5938777cca73374981595c88457e759
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
