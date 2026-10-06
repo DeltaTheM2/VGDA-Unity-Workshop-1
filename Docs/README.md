@@ -15,27 +15,27 @@ In one hour you'll build a 3D platformer obstacle course: a player you control, 
 | | |
 |---|---|
 | **Unity version** | **6000.3.8f1** (Unity 6.3 LTS) |
-| **Hub link** | [unityhub://6000.3.8f1/1c7db571dde0](unityhub://6000.3.8f1/1c7db571dde0) (opens Unity Hub straight to this version) |
+| **Hub link** | [Unity 6000.3.8f1 release page](https://unity.com/releases/editor/whats-new/6000.3.8f1): its Unity Hub install link opens Hub straight to this version. Or paste `unityhub://6000.3.8f1/1c7db571dde0` into your browser. |
 | **No Hub link?** | [Unity download archive](https://unity.com/releases/editor/archive) → Unity 6 → **6000.3.8f1** → *Install* |
 
 It has to be **exactly 6000.3.8f1**. A different version will want to "upgrade" the project and things can break.
 
-1. Install **[Unity Hub](https://unity.com/download)** and sign in (a free Unity Personal license is fine).
+1. Install **[Unity Hub](https://unity.com/download)** and sign in. The download page asks you to create or sign in to a free Unity account first; a free Unity Personal license is fine.
 2. Click the Hub link above, or go to **Installs > Install Editor > Archive** and find 6000.3.8f1.
 3. Modules: you don't need any build modules. If you don't already have a code editor, tick **Microsoft Visual Studio Community** (Windows), or see [Code editor setup](#code-editor-setup).
 4. On an Apple Silicon Mac, pick the **Apple silicon** editor.
 
 ## 2. Get the project
 
-Download **`unity-workshop-step-0-starter.zip`** from this repository's **Releases** page (or from the link in the Discord thread) and unzip it somewhere easy to find.
+Download **`unity-workshop-step-0-starter.zip`** from the **[Releases page](https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1/releases)** (or from the link in the Discord thread) and unzip it somewhere easy to find.
 
 - **On Windows, keep the path short**, for example `C:\UnityWorkshop\`. Unity's package files are deeply nested, and Windows has a 260-character path limit.
 - Avoid OneDrive/iCloud-synced folders if you can, because they slow Unity down.
 
-Using git instead?
+Using git instead? Clone it, then switch to the starter (a fresh clone is the finished project):
 
 ```bash
-git clone <this repository's URL> unity-workshop
+git clone https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1.git unity-workshop
 ```
 
 ```bash

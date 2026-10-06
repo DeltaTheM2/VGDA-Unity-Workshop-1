@@ -28,7 +28,7 @@ The checkpoint scenes use their **own copies** of every script and prefab (in `C
 
 ## After the workshop: the full project at each step
 
-Each step also has a **git tag** and a **zip** on the Releases page with the whole project as it looks at the end of that step: your scripts in `Scripts/`, your prefabs in `Prefabs/`, and the `Arena` scene built up. Use these if your whole project is broken, or to compare your work with the reference.
+Each step also has a **git tag** and a **zip** on the [Releases page](https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1/releases) with the whole project as it looks at the end of that step: your scripts in `Scripts/`, your prefabs in `Prefabs/`, and the `Arena` scene built up. Use these if your whole project is broken, or to compare your work with the reference.
 
 | Tag / zip | End of |
 |---|---|
@@ -43,18 +43,30 @@ Each step also has a **git tag** and a **zip** on the Releases page with the who
 
 ### Option A: download the zip (no git needed)
 
-1. On this repository's **Releases** page, download `unity-workshop-<tag>.zip`, for example `unity-workshop-step-4-player.zip`.
+1. On the **[Releases page](https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1/releases)**, download `unity-workshop-<tag>.zip`, for example `unity-workshop-step-4-player.zip`.
 2. Unzip it into a **new** folder with a short path (Windows: something like `C:\UnityWorkshop\`). Don't unzip on top of your own project.
 3. Unity Hub > **Projects > Add > Add project from disk** and select the **`UnityProject`** folder inside.
 4. Open it. The first open imports everything again, which takes a few minutes.
 
 ### Option B: git checkout
 
-Close Unity first (or at least save everything). Then:
+No clone yet? Get one first (it comes with every tag):
+
+```bash
+git clone https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1.git unity-workshop
+```
+
+```bash
+cd unity-workshop
+```
+
+Already have a clone? Close Unity first (or at least save everything), then get the latest tags:
 
 ```bash
 git fetch --tags
 ```
+
+Then, either way:
 
 ```bash
 git checkout step-4-player

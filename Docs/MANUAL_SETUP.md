@@ -66,14 +66,14 @@ Tools/build-checkpoints.sh
 1. Create an **empty** GitHub repository (no README), then push the branch and all the checkpoint tags:
 
    ```bash
-   git remote add origin https://github.com/<you>/<repo>.git
+   git remote add origin https://github.com/DeltaTheM2/VGDA-Unity-Workshop-1.git
    ```
 
    ```bash
    git push -u origin main --tags
    ```
 
-   If you rebuilt checkpoints later (the tags move), push them with `git push --force --tags`.
+   If you rebuilt checkpoints later (the history and tags are recreated), push with `git push --force origin main --tags`.
 2. Build the zips (one per tag, instructor files left out automatically):
 
    ```bash
